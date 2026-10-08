@@ -664,6 +664,124 @@ input[type='range'] {
   gap: 8px;
 }
 
+/* ---------- gallery ---------- */
+
+.gallery-hint {
+  color: var(--muted);
+  font-size: 11px;
+  font-family: system-ui, sans-serif;
+  font-weight: 400;
+  margin: 4px 0 0;
+  line-height: 1.5;
+}
+
+.publish-row {
+  display: flex;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+
+.publish-row input {
+  flex: 1;
+  min-width: 0;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11px;
+  padding: 6px 8px;
+}
+
+.publish-row input::placeholder {
+  color: var(--muted);
+}
+
+.publish-row .tb {
+  white-space: nowrap;
+}
+
+.publish-row .tb:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+
+.gallery-msg {
+  font-size: 11px;
+  color: var(--accent);
+  margin: 0 0 8px;
+  font-family: system-ui, sans-serif;
+  font-weight: 400;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  max-height: 240px;
+  overflow-y: auto;
+}
+
+.gallery-item {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background:
+    conic-gradient(#1e1e26 25%, #262633 0 50%, #1e1e26 0 75%, #262633 0) 0 0/16px 16px;
+}
+
+.gallery-item.broken::after {
+  content: '🖼';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.15s;
+}
+
+.gallery-item:hover img {
+  transform: scale(1.06);
+}
+
+.gallery-cap {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 12px 6px 5px;
+  background: linear-gradient(transparent, rgba(0, 0, 0, 0.85));
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  pointer-events: none;
+}
+
+.gallery-cap strong {
+  font-size: 9.5px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.gallery-cap em {
+  font-style: normal;
+  font-size: 8.5px;
+  color: var(--accent);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* scrollbars */
 ::-webkit-scrollbar {
   width: 9px;

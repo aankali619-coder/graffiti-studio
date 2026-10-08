@@ -9,6 +9,7 @@ import { CanvasStage } from './components/CanvasStage'
 import { OptionsPanel } from './components/OptionsPanel'
 import { ColorPanel } from './components/ColorPanel'
 import { LayersPanel } from './components/LayersPanel'
+import { GalleryPanel } from './components/GalleryPanel'
 import { StatusBar } from './components/StatusBar'
 
 const KEY_TOOLS: Record<string, ToolId> = Object.fromEntries(
@@ -104,6 +105,7 @@ export default function App() {
           <OptionsPanel ed={ed} />
           <ColorPanel ed={ed} />
           <LayersPanel ed={ed} />
+          <GalleryPanel ed={ed} />
         </aside>
       </div>
     </div>
