@@ -1,7 +1,9 @@
+import { useState } from 'react'
 import type { Editor } from '../editor/Editor'
 import { TOOL_META, type OptionKey } from '../toolMeta'
 import { FONTS, type FillMode } from '../types'
 import { useEditorState } from '../hooks'
+import { ICON_STAMPS, LETTERS, renderStampPreview } from '../editor/stamps'
 
 function Slider({
   label, min, max, step, value, onChange, format,
@@ -27,6 +29,102 @@ function Slider({
       />
       <span className="slider-value">{format ? format(value) : value}</span>
     </label>
+  )
+}
+
+/** Graffiti alphabet & icon stamps. */
+function StampPicker({ ed }: { ed: Editor }) {
+  const o = ed.options
+  const [tab, setTab] = useState<'letters' | 'icons'>('letters')
+
+  const pickLetter = (ch: string) => {
+    ed.setOptions({ stampKind: 'letter', stampValue: ch })
+    ed.setTool('stamp')
+  }
+  const pickIcon = (id: string) => {
+    ed.setOptions({ stampKind: 'icon', stampValue: id })
+    ed.setTool('stamp')
+  }
+
+  return (
+    <div className="stamp-picker">
+      <div className="segmented">
+        <button className={tab === 'letters' ? 'on' : ''} onClick={() => setTab('letters')}>
+          Alphabet
+        </button>
+        <button className={tab === 'icons' ? 'on' : ''} onClick={() => setTab('icons')}>
+          Icons
+        </button>
+      </div>
+
+      {tab === 'letters' ? (
+        <div className="letter-grid">
+          {LETTERS.map((ch) => (
+            <button
+              key={ch}
+              className={`letter-tile${o.stampKind === 'letter' && o.stampValue === ch ? ' active' : ''}`}
+              onClick={() => pickLetter(ch)}
+            >
+              {ch}
+            </button>
+          ))}
+        </div>
+      ) : (
+        <div className="icon-grid">
+          {ICON_STAMPS.map((icon) => (
+            <button
+              key={icon.id}
+              className={`icon-tile${o.stampKind === 'icon' && o.stampValue === icon.id ? ' active' : ''}`}
+              title={icon.label}
+              onClick={() => pickIcon(icon.id)}
+            >
+              <canvas ref={(cv) => { if (cv) renderStampPreview(cv, icon.id, 'icon') }} />
+            </button>
+          ))}
+        </div>
+      )}
+
+      <Slider label="Stamp size" min={24} max={600} step={4} value={o.fontSize}
+        onChange={(v) => ed.setOptions({ fontSize: v })} format={(v) => `${v}px`} />
+      <label className="check-row">
+        <input
+          type="checkbox"
+          checked={o.drips}
+          onChange={(e) => ed.setOptions({ drips: e.target.checked })}
+        />
+        Paint drips on stamps
+      </label>
+    </div>
+  )
+}
+
+const SPRAY_CAPS = [
+  { id: 'skinny', label: 'Skinny', size: 6, flow: 0.45, spread: 0.25 },
+  { id: 'regular', label: 'Regular', size: 18, flow: 0.6, spread: 0.6 },
+  { id: 'fat', label: 'Fat', size: 44, flow: 0.65, spread: 0.9 },
+  { id: 'super', label: 'Super Fat', size: 96, flow: 0.7, spread: 1.3 },
+]
+
+/** Spray can cap sizes — the single biggest difference between can styles. */
+function CapPicker({ ed }: { ed: Editor }) {
+  const o = ed.options
+  return (
+    <div className="cap-row">
+      {SPRAY_CAPS.map((c) => {
+        const active = Math.abs(o.size - c.size) <= 2 && Math.abs(o.spread - c.spread) < 0.2
+        return (
+          <button
+            key={c.id}
+            className={`cap-btn${active ? ' active' : ''}`}
+            title={`${c.label} cap — ${c.size}px`}
+            onClick={() => ed.setOptions({ size: c.size, flow: c.flow, spread: c.spread })}
+          >
+            <span className={`cap-dot cap-${c.id}`} style={{ background: o.color }} />
+            {c.label}
+          </button>
+        )
+      })}
+    </div>
   )
 }
 
@@ -161,7 +259,11 @@ export function OptionsPanel({ ed }: { ed: Editor }) {
       <h3>
         {meta.label} <span className="hint">{meta.hint}</span>
       </h3>
-      <div className="options">{meta.options.map(render)}</div>
+      <div className="options">
+        {ed.tool === 'stamp' && <StampPicker ed={ed} />}
+        {ed.tool === 'spray' && <CapPicker ed={ed} />}
+        {meta.options.map(render)}
+      </div>
     </section>
   )
 }

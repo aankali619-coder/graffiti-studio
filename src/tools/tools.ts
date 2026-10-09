@@ -3,6 +3,7 @@ import type { ToolId, ToolOptions } from '../types'
 import { clamp, hexToRgb, hexToRgba, shade } from '../editor/utils'
 import { floodFill, blurRegion } from '../editor/floodFill'
 import { drawShape, type Pt } from '../editor/shapes'
+import { drawStamp, addTextDrips } from '../editor/stamps'
 
 export interface PointerInfo {
   x: number
@@ -288,9 +289,11 @@ function dripTool(): ToolHandlers {
   }
 }
 
-// ---------- shape tools (live preview + commit) ----------
+// ---------- shape & stamp tools (live preview + commit) ----------
 
-function shapeTool(id: ToolId): ToolHandlers {
+function previewTool(
+  render: (ctx: CanvasRenderingContext2D, start: Pt, p: Pt, o: ToolOptions, shift: boolean, alt: boolean) => void,
+): ToolHandlers {
   let down = false
   let start: Pt = { x: 0, y: 0 }
   return {
@@ -303,7 +306,7 @@ function shapeTool(id: ToolId): ToolHandlers {
       const ed = editorRef!
       if (!down) return
       ed.overlayCtx.clearRect(0, 0, ed.width, ed.height)
-      drawShape(ed.overlayCtx, id, start, p, ed.options, p.shift, p.alt)
+      render(ed.overlayCtx, start, p, ed.options, p.shift, p.alt)
       ed.emitDraw()
     },
     up(p) {
@@ -313,13 +316,21 @@ function shapeTool(id: ToolId): ToolHandlers {
       ed.overlayCtx.clearRect(0, 0, ed.width, ed.height)
       const layer = ed.activeLayer()
       if (layer) {
-        drawShape(layer.ctx, id, start, p, ed.options, p.shift, p.alt)
+        render(layer.ctx, start, p, ed.options, p.shift, p.alt)
         ed.endPixels()
       }
       ed.emit()
       ed.emitDraw()
     },
   }
+}
+
+function shapeTool(id: ToolId): ToolHandlers {
+  return previewTool((ctx, start, p, o, shift, alt) => drawShape(ctx, id, start, p, o, shift, alt))
+}
+
+function stampTool(): ToolHandlers {
+  return previewTool((ctx, start, p, o) => drawStamp(ctx, o, start, p))
 }
 
 // ---------- gradient ----------
@@ -494,30 +505,6 @@ export function commitText(ed: Editor, x: number, y: number) {
   ed.emitDraw()
 }
 
-function addTextDrips(ctx: CanvasRenderingContext2D, line: string, x: number, y: number, o: ToolOptions) {
-  let cx = x
-  for (const ch of Array.from(line)) {
-    const w = ctx.measureText(ch).width
-    if (ch.trim() && Math.random() < 0.28) {
-      const len = o.fontSize * (0.25 + Math.random() * 0.9)
-      const rx = cx + w * (0.25 + Math.random() * 0.5)
-      const base = Math.max(1.5, o.fontSize * 0.035)
-      const steps = Math.max(4, Math.round(len / 3))
-      const top = y + o.fontSize * 0.86
-      for (let i = 0; i <= steps; i++) {
-        const t = i / steps
-        ctx.beginPath()
-        ctx.arc(rx, top + len * t, Math.max(0.6, base * (1 - t * 0.55)), 0, Math.PI * 2)
-        ctx.fill()
-      }
-      ctx.beginPath()
-      ctx.arc(rx, top + len, base * 0.9, 0, Math.PI * 2)
-      ctx.fill()
-    }
-    cx += w
-  }
-}
-
 // ---------- registry ----------
 
 export function createTools(ed: Editor): Record<ToolId, ToolHandlers> {
@@ -537,6 +524,7 @@ export function createTools(ed: Editor): Record<ToolId, ToolHandlers> {
     ellipse: shapeTool('ellipse'),
     polygon: shapeTool('polygon'),
     star: shapeTool('star'),
+    stamp: stampTool(),
     text: noopTool, // handled by the DOM overlay in CanvasStage
     fill: fillTool(),
     gradient: gradientTool(),

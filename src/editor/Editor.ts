@@ -290,6 +290,48 @@ export class Editor {
     this.emitDraw()
   }
 
+  /** Imports an image file as a new layer, scaled to fit the canvas. */
+  async importImage(file: File): Promise<void> {
+    const url = URL.createObjectURL(file)
+    try {
+      const img = await loadImage(url)
+      const before = this.snapshot()
+      const name = file.name.replace(/\.[^.]+$/, '').slice(0, 24) || 'Imported image'
+      const layer = createLayer(name, this.width, this.height)
+      const scale = Math.min(this.width / img.width, this.height / img.height, 1)
+      const dw = img.width * scale
+      const dh = img.height * scale
+      layer.ctx.drawImage(img, (this.width - dw) / 2, (this.height - dh) / 2, dw, dh)
+      const idx = this.layers.findIndex((l) => l.id === this.activeId)
+      this.layers.splice(idx + 1, 0, layer)
+      this.activeId = layer.id
+      this.pushHistory({ type: 'structure', before, after: this.snapshot() })
+      this.emit()
+      this.emitDraw()
+    } finally {
+      URL.revokeObjectURL(url)
+    }
+  }
+
+  /** Mirrors the whole piece horizontally or vertically (like checking your piece in a mirror). */
+  flip(dir: 'h' | 'v') {
+    const before = this.snapshot()
+    for (const layer of this.layers) {
+      const tmp = document.createElement('canvas')
+      tmp.width = this.width
+      tmp.height = this.height
+      const tctx = tmp.getContext('2d')!
+      tctx.translate(dir === 'h' ? this.width : 0, dir === 'v' ? this.height : 0)
+      tctx.scale(dir === 'h' ? -1 : 1, dir === 'v' ? -1 : 1)
+      tctx.drawImage(layer.canvas, 0, 0)
+      layer.ctx.clearRect(0, 0, this.width, this.height)
+      layer.ctx.drawImage(tmp, 0, 0)
+    }
+    this.pushHistory({ type: 'structure', before, after: this.snapshot() })
+    this.emit()
+    this.emitDraw()
+  }
+
   setLayer(id: string, patch: Partial<Pick<Layer, 'name' | 'visible' | 'opacity' | 'blend'>>) {
     const layer = this.layers.find((l) => l.id === id)
     if (!layer) return

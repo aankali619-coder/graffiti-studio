@@ -1,6 +1,6 @@
 import {
   SprayCan, PenLine, Highlighter, Brush, Droplets, Droplet, Eraser,
-  Minus, ArrowUpRight, Square, Circle, Hexagon, Star, Type,
+  Minus, ArrowUpRight, Square, Circle, Hexagon, Star, Sticker, Type,
   PaintBucket, Blend, Pipette, Waves, Hand,
 } from 'lucide-react'
 import type { Editor } from '../editor/Editor'
@@ -22,6 +22,7 @@ const ICONS: Record<ToolId, typeof Brush> = {
   ellipse: Circle,
   polygon: Hexagon,
   star: Star,
+  stamp: Sticker,
   text: Type,
   fill: PaintBucket,
   gradient: Blend,

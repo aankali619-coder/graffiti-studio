@@ -1,7 +1,7 @@
 import { useRef, useState } from 'react'
 import {
   Undo2, Redo2, Download, Upload, Save, FilePlus,
-  ZoomIn, ZoomOut, Maximize, Magnet, Layers as LayersIcon,
+  ZoomIn, ZoomOut, Maximize, Magnet, Layers as LayersIcon, ImagePlus,
 } from 'lucide-react'
 import type { Editor } from '../editor/Editor'
 import { WALL_TEXTURES, type WallTexture } from '../types'
@@ -11,6 +11,7 @@ import { useEditorState } from '../hooks'
 export function TopBar({ ed }: { ed: Editor }) {
   useEditorState(ed)
   const fileRef = useRef<HTMLInputElement>(null)
+  const imgRef = useRef<HTMLInputElement>(null)
   const [showNew, setShowNew] = useState(false)
 
   const zoomPct = Math.round(ed.view.zoom * 100)
@@ -37,6 +38,26 @@ export function TopBar({ ed }: { ed: Editor }) {
         <button className="tb" title="Export PNG without background" onClick={() => exportPNG(ed, true)}>
           <Download size={15} /> Sticker
         </button>
+        <button className="tb" title="Import an image as a new layer" onClick={() => imgRef.current?.click()}>
+          <ImagePlus size={15} /> Image
+        </button>
+        <input
+          ref={imgRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp,image/gif,image/svg+xml"
+          style={{ display: 'none' }}
+          onChange={async (e) => {
+            const f = e.target.files?.[0]
+            if (f) {
+              try {
+                await ed.importImage(f)
+              } catch {
+                alert('Could not read that image.')
+              }
+            }
+            e.target.value = ''
+          }}
+        />
       </div>
 
       <div className="btn-group">
@@ -45,6 +66,15 @@ export function TopBar({ ed }: { ed: Editor }) {
         </button>
         <button className="tb icon" title="Redo (Ctrl+Shift+Z)" onClick={() => void ed.redo()}>
           <Redo2 size={16} />
+        </button>
+      </div>
+
+      <div className="btn-group">
+        <button className="tb" title="Mirror the whole piece left-to-right" onClick={() => ed.flip('h')}>
+          Flip ↔
+        </button>
+        <button className="tb" title="Mirror the whole piece top-to-bottom" onClick={() => ed.flip('v')}>
+          Flip ↕
         </button>
       </div>
 

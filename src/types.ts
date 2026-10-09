@@ -1,7 +1,7 @@
 export type ToolId =
   | 'spray' | 'marker' | 'chisel' | 'brush' | 'splatter' | 'drip' | 'eraser'
   | 'line' | 'arrow' | 'rect' | 'ellipse' | 'polygon' | 'star'
-  | 'text' | 'fill' | 'gradient' | 'eyedropper' | 'blur' | 'hand'
+  | 'stamp' | 'text' | 'fill' | 'gradient' | 'eyedropper' | 'blur' | 'hand'
 
 export type FillMode = 'none' | 'solid' | 'gradient'
 
@@ -59,6 +59,8 @@ export interface ToolOptions {
   symmetryX: boolean
   symmetryY: boolean
   textValue: string
+  stampKind: 'letter' | 'icon'
+  stampValue: string
 }
 
 export const DEFAULT_OPTIONS: ToolOptions = {
@@ -86,6 +88,8 @@ export const DEFAULT_OPTIONS: ToolOptions = {
   symmetryX: false,
   symmetryY: false,
   textValue: 'GRAFFITI',
+  stampKind: 'letter',
+  stampValue: 'A',
 }
 
 export const WALL_TEXTURES = ['plain', 'concrete', 'brick'] as const

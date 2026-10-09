@@ -782,6 +782,122 @@ input[type='range'] {
   white-space: nowrap;
 }
 
+/* ---------- stamps & caps ---------- */
+
+.stamp-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.letter-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+}
+
+.letter-tile {
+  aspect-ratio: 1;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: 'Permanent Marker', cursive;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  transition: all 0.1s;
+}
+
+.letter-tile:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.letter-tile.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #101014;
+}
+
+.icon-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.icon-tile {
+  aspect-ratio: 1;
+  background: #12121a;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: pointer;
+  padding: 4px;
+  display: grid;
+  place-items: center;
+  transition: all 0.1s;
+}
+
+.icon-tile canvas {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.icon-tile:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.icon-tile.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(200, 255, 46, 0.35);
+}
+
+.cap-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 5px;
+}
+
+.cap-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  background: var(--panel-2);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--muted);
+  font-family: inherit;
+  font-size: 9.5px;
+  padding: 7px 3px;
+  cursor: pointer;
+  transition: all 0.1s;
+}
+
+.cap-btn:hover {
+  border-color: #3a3a48;
+  color: var(--text);
+}
+
+.cap-btn.active {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 0 0 1px rgba(200, 255, 46, 0.25);
+}
+
+.cap-dot {
+  border-radius: 50%;
+  box-shadow: inset 0 0 4px rgba(0, 0, 0, 0.35);
+  display: block;
+}
+
+.cap-skinny { width: 6px; height: 6px; }
+.cap-regular { width: 12px; height: 12px; }
+.cap-fat { width: 20px; height: 20px; }
+.cap-super { width: 28px; height: 28px; }
+
 /* scrollbars */
 ::-webkit-scrollbar {
   width: 9px;
