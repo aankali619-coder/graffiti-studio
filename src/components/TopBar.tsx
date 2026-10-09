@@ -8,7 +8,7 @@ import { WALL_TEXTURES, type WallTexture } from '../types'
 import { saveProject, openProject, exportPNG } from '../fileio'
 import { useEditorState } from '../hooks'
 
-export function TopBar({ ed }: { ed: Editor }) {
+export function TopBar({ ed, onDownload }: { ed: Editor; onDownload: () => void }) {
   useEditorState(ed)
   const fileRef = useRef<HTMLInputElement>(null)
   const imgRef = useRef<HTMLInputElement>(null)
@@ -29,14 +29,14 @@ export function TopBar({ ed }: { ed: Editor }) {
         <button className="tb" title="Open project (.json)" onClick={() => fileRef.current?.click()}>
           <Upload size={15} /> Open
         </button>
-        <button className="tb" title="Save project (Ctrl+S)" onClick={() => saveProject(ed)}>
+        <button className="tb" title="Save project file (Ctrl+Shift+S)" onClick={() => saveProject(ed)}>
           <Save size={15} /> Save
         </button>
         <button className="tb accent" title="Export PNG (Ctrl+E)" onClick={() => exportPNG(ed)}>
           <Download size={15} /> Export PNG
         </button>
-        <button className="tb" title="Export PNG without background" onClick={() => exportPNG(ed, true)}>
-          <Download size={15} /> Sticker
+        <button className="tb" title="Open the Download tab — sizes, transparent, clipboard" onClick={onDownload}>
+          <Download size={15} /> Download
         </button>
         <button className="tb" title="Import an image as a new layer" onClick={() => imgRef.current?.click()}>
           <ImagePlus size={15} /> Image

@@ -464,21 +464,40 @@ export class Editor {
   }
 
   // ---------- composite / export ----------
-  composite(): HTMLCanvasElement {
+  /**
+   * Flattens the artwork to a single canvas.
+   * opts.background — paint bg colour + texture first (default true)
+   * opts.scale — output scale factor (default 1)
+   * opts.layerOnly — export only the active layer, at its opacity (default false)
+   */
+  composite(opts?: { background?: boolean; scale?: number; layerOnly?: boolean }): HTMLCanvasElement {
+    const background = opts?.background ?? true
+    const scale = opts?.scale ?? 1
+    const layerOnly = opts?.layerOnly ?? false
     const cv = document.createElement('canvas')
-    cv.width = this.width
-    cv.height = this.height
+    cv.width = Math.max(1, Math.round(this.width * scale))
+    cv.height = Math.max(1, Math.round(this.height * scale))
     const ctx = cv.getContext('2d')!
-    if (this.bg !== 'transparent') {
+    ctx.scale(scale, scale)
+    if (background && this.bg !== 'transparent') {
       ctx.fillStyle = this.bg
       ctx.fillRect(0, 0, this.width, this.height)
       if (this.textureCanvas) ctx.drawImage(this.textureCanvas, 0, 0)
     }
-    for (const l of this.layers) {
-      if (!l.visible) continue
-      ctx.globalAlpha = l.opacity
-      ctx.globalCompositeOperation = l.blend as GlobalCompositeOperation
-      ctx.drawImage(l.canvas, 0, 0)
+    if (layerOnly) {
+      const l = this.activeLayer()
+      if (l) {
+        ctx.globalAlpha = l.opacity
+        ctx.globalCompositeOperation = 'source-over'
+        ctx.drawImage(l.canvas, 0, 0)
+      }
+    } else {
+      for (const l of this.layers) {
+        if (!l.visible) continue
+        ctx.globalAlpha = l.opacity
+        ctx.globalCompositeOperation = l.blend as GlobalCompositeOperation
+        ctx.drawImage(l.canvas, 0, 0)
+      }
     }
     ctx.globalAlpha = 1
     ctx.globalCompositeOperation = 'source-over'

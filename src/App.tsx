@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Editor } from './editor/Editor'
 import type { ToolId } from './types'
 import { TOOL_ORDER } from './toolMeta'
-import { saveProject, exportPNG } from './fileio'
+import { saveProject, downloadArtwork, exportPNG } from './fileio'
 import { TopBar } from './components/TopBar'
 import { Toolbar } from './components/Toolbar'
 import { CanvasStage } from './components/CanvasStage'
@@ -10,14 +10,19 @@ import { OptionsPanel } from './components/OptionsPanel'
 import { ColorPanel } from './components/ColorPanel'
 import { LayersPanel } from './components/LayersPanel'
 import { GalleryPanel } from './components/GalleryPanel'
+import { DownloadsPanel } from './components/DownloadsPanel'
 import { StatusBar } from './components/StatusBar'
+import { Globe } from 'lucide-react'
 
 const KEY_TOOLS: Record<string, ToolId> = Object.fromEntries(
   TOOL_ORDER.map((t) => [t.shortcut.toLowerCase(), t.id]),
 )
 
+type SidebarTab = 'studio' | 'layers' | 'gallery' | 'download'
+
 export default function App() {
   const [ed] = useState(() => new Editor())
+  const [tab, setTab] = useState<SidebarTab>('studio')
   // handy for debugging / automated tests
   ;(window as unknown as { __editor?: Editor }).__editor = ed
 
@@ -37,8 +42,10 @@ export default function App() {
           e.preventDefault()
           void ed.redo()
         } else if (k === 's') {
+          // Ctrl+S = download PNG; Ctrl+Shift+S = save project file
           e.preventDefault()
-          saveProject(ed)
+          if (e.shiftKey) saveProject(ed)
+          else void downloadArtwork(ed)
         } else if (k === 'e') {
           e.preventDefault()
           exportPNG(ed)
@@ -94,7 +101,7 @@ export default function App() {
 
   return (
     <div className="app">
-      <TopBar ed={ed} />
+      <TopBar ed={ed} onDownload={() => setTab('download')} />
       <div className="main">
         <Toolbar ed={ed} />
         <div className="center">
@@ -102,10 +109,39 @@ export default function App() {
           <StatusBar ed={ed} />
         </div>
         <aside className="sidebar">
-          <OptionsPanel ed={ed} />
-          <ColorPanel ed={ed} />
-          <LayersPanel ed={ed} />
-          <GalleryPanel ed={ed} />
+          <div className="tabs" role="tablist">
+            {(
+              [
+                ['studio', 'Studio'],
+                ['layers', 'Layers'],
+                ['download', 'DOWNLOADS'],
+                ['gallery', null], // icon-only: Community Gallery
+              ] as [SidebarTab, string | null][]
+            ).map(([id, label]) => (
+              <button
+                key={id}
+                role="tab"
+                aria-selected={tab === id}
+                aria-label={label ?? 'Community Gallery'}
+                title={label ?? 'Community Gallery'}
+                className={`tab${tab === id ? ' on' : ''}${label === null ? ' icon' : ''}`}
+                onClick={() => setTab(id)}
+              >
+                {label ?? <Globe size={14} />}
+              </button>
+            ))}
+          </div>
+          <div className="sidebar-body">
+            {tab === 'studio' && (
+              <>
+                <OptionsPanel ed={ed} />
+                <ColorPanel ed={ed} />
+              </>
+            )}
+            {tab === 'layers' && <LayersPanel ed={ed} />}
+            {tab === 'gallery' && <GalleryPanel ed={ed} />}
+            {tab === 'download' && <DownloadsPanel ed={ed} />}
+          </div>
         </aside>
       </div>
     </div>
